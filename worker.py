@@ -6,29 +6,44 @@ from app.mq import (
     RABBITMQ_URL,
     MQ_EXCHANGE,
     MQ_QUEUE_INCOMING,
+    MQ_QUEUE_REACTIONS_INCOMING,
     MQ_ROUTING_KEY_CREATED,
+    MQ_ROUTING_KEY_REACTION_CREATED,
 )
 from workers.messages import handle_message
+from workers.reactions import handle_reaction
 
 
-async def consume() -> None:
+async def consume(queue_name, routing_key, handler, channel, exchange) -> None:
+    queue = await channel.declare_queue(queue_name, durable=True)
+    await queue.bind(exchange, routing_key=routing_key)
+    async with queue.iterator() as iterator:
+        async for incoming in iterator:
+            async with incoming.process(requeue=True):
+                await handler(incoming, exchange)
+
+
+async def run_worker() -> None:
     connection = await aio_pika.connect_robust(RABBITMQ_URL)
     channel = await connection.channel()
     exchange = await channel.declare_exchange(
         MQ_EXCHANGE, aio_pika.ExchangeType.TOPIC, durable=True
     )
-    queue = await channel.declare_queue(MQ_QUEUE_INCOMING, durable=True)
-    await queue.bind(exchange, routing_key=MQ_ROUTING_KEY_CREATED)
-
-    async with queue.iterator() as iterator:
-        async for incoming in iterator:
-            async with incoming.process(requeue=True):
-                await handle_message(incoming, exchange)
+    await asyncio.gather(
+        consume(MQ_QUEUE_INCOMING, MQ_ROUTING_KEY_CREATED, handle_message, channel, exchange),
+        consume(
+            MQ_QUEUE_REACTIONS_INCOMING,
+            MQ_ROUTING_KEY_REACTION_CREATED,
+            handle_reaction,
+            channel,
+            exchange,
+        ),
+    )
 
 
 async def main() -> None:
     await init_models()
-    await asyncio.gather(consume())
+    await run_worker()
 
 
 if __name__ == "__main__":
