@@ -79,3 +79,27 @@ body {
   cursor: pointer;
   padding: 2px 6px;
 }
+
+.webrtc-panel {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+.webrtc-videos {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+.webrtc-videos video {
+  width: 240px;
+  max-width: 100%;
+  background: #111;
+  border-radius: 6px;
+}
+.webrtc-hint {
+  font-size: 14px;
+  color: #555;
+}

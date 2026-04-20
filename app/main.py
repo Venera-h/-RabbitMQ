@@ -17,7 +17,7 @@ from app.mq import (
     MQ_ROUTING_KEY_CREATED,
     MQ_ROUTING_KEY_REACTION_CREATED,
 )
-from app.ws import manager
+from app.ws import manager, signal_manager
 
 templates = Jinja2Templates(directory="app/templates")
 _bg_tasks: list[asyncio.Task] = []
@@ -216,3 +216,16 @@ async def mark_read(room_id: str, username: str = Form(...), message_id: int = F
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+@app.websocket("/ws/signal/{room_id}")
+async def ws_signal(ws: WebSocket, room_id: str):
+    """Только relay JSON между пирами в комнате; тело не парсится."""
+    await signal_manager.connect(room_id, ws)
+    try:
+        while True:
+            raw = await ws.receive_text()
+            await signal_manager.relay(room_id, ws, raw)
+    except WebSocketDisconnect:
+        signal_manager.disconnect(room_id, ws)
+    except Exception:
+        signal_manager.disconnect(room_id, ws)
