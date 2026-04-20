@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Лабораторная работа: чат FastAPI + HTMX + RabbitMQ</title>
+<style media="print">body{font-family:Arial,sans-serif;font-size:12px}.container{box-shadow:none;background:white}.header{background:white!important;color:black!important}.save-btn{display:none!important}.section{page-break-inside:avoid}</style>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',sans-serif;line-height:1.6;color:#333;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh}.container{max-width:1200px;margin:20px auto;padding:20px;background:white;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.2)}.header{text-align:center;padding:30px;background:linear-gradient(135deg,#005EB8,#003D82);color:white;border-radius:10px;margin-bottom:30px}.header h1{font-size:2.5em;margin-bottom:10px}.student-info{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:30px;padding:20px;background:#f8f9fa;border-radius:10px}.form-group{margin-bottom:20px}.form-group label{display:block;margin-bottom:5px;font-weight:bold;color:#003D82}.form-group input,.form-group textarea{width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:8px;font-size:16px}.section{margin-bottom:40px;padding:25px;background:#fff;border-left:5px solid #005EB8;border-radius:0 10px 10px 0;box-shadow:0 2px 10px rgba(0,0,0,0.1)}.section>h2{color:#003D82;margin-bottom:20px;font-size:1.8em}.section>h3{color:#005EB8;margin:20px 0 10px;font-size:1.3em}.section>h4{color:#333;margin:15px 0 8px;font-size:1.1em}.code-block{background:#282c34;color:#e2e8f0;padding:20px;border-radius:8px;margin:15px 0;font-family:'Courier New',monospace;overflow-x:auto;white-space:pre-wrap;font-size:14px}ul.list-plain{list-style:none;padding-left:0}ul.list-plain li{padding:8px 0 8px 30px;position:relative}ul.list-plain li::before{content:'▸';position:absolute;left:0;color:#005EB8;font-size:18px}ol.pad{padding-left:20px}ol.pad li{padding:5px 0}table{width:100%;border-collapse:collapse;margin:15px 0}table th,table td{border:1px solid #ddd;padding:12px;text-align:left}table th{background:#005EB8;color:white}table tr:nth-child(even){background:#f8f9fa}.checkbox-item{margin:15px 0;padding:15px 20px;background:linear-gradient(135deg,#005EB8,#003D82);border-radius:10px;display:flex;align-items:center}.checkbox-item input[type="checkbox"]{appearance:none;width:26px;height:26px;border:3px solid white;border-radius:6px;margin-right:15px;cursor:pointer;background:transparent;flex-shrink:0}.checkbox-item input[type="checkbox"]:checked{background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23005EB8"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>') center/18px no-repeat;border-color:#fff}.checkbox-item label{color:white;font-weight:500;cursor:pointer}.save-btn{background:linear-gradient(135deg,#005EB8,#003D82);color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px;cursor:pointer;display:block;margin:30px auto}code.k{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:0.9em}.note{background:#e3f2fd;padding:15px;border-radius:8px;margin:15px 0;border-left:4px solid #2196f3}.warning{background:#fff8e1;padding:15px;border-radius:8px;margin:15px 0;border-left:4px solid #ff9800}.toc{margin:20px 0;padding:20px;background:#f5f5f5;border-radius:8px}.toc a{color:#005EB8;text-decoration:none}.toc a:hover{text-decoration:underline}.md-h1{font-size:1.85em;color:#003D82;margin:0 0 16px}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ini.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/nginx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/powershell.min.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="header">
+<h1>Лабораторная работа</h1>
+<h2>Простой чат на FastAPI + HTMX WebSocket · RabbitMQ · PostgreSQL</h2>
+<p>FastAPI &bull; HTMX ws &bull; Docker &bull; Nginx &bull; RabbitMQ &bull; SQLAlchemy async &bull; pytest &bull; GitHub Actions</p>
+</div>
+<div class="student-info">
+<div class="form-group"><label>ФИО:</label><input type="text" id="student-name"></div>
+<div class="form-group"><label>Группа:</label><input type="text" id="group"></div>
+<div class="form-group"><label>Дата:</label><input type="date" id="date"></div>
+</div>
+<div class="section" id="toc-top">
+<h2>Содержание</h2>
+<div class="toc">
+<ol class="pad">
+<li><a href="#part1">Часть 1: простой чат (вариант 0)</a></li>
+<li><a href="#s1">1. Подготовка окружения</a></li>
+<li><a href="#s2">2. Деплой на VPS</a> — <a href="#s211">2.11 Нагрузка (room.html)</a></li>
+<li><a href="#part2">Часть 2: БД и брокер</a></li>
+<li><a href="#s3">3. Backend (db, mq, main, worker)</a></li>
+<li><a href="#s4">4. Шаблоны и стили</a></li>
+<li><a href="#s5">5. Проверка по шагам</a></li>
+<li><a href="#s6">6. Health и тесты</a></li>
+<li><a href="#s8">8. CI (GitHub Actions)</a></li>
+<li><a href="#checklist">Чек-лист</a>, <a href="#repo-link-section">Репозиторий</a>, <a href="#vyvody">Выводы</a></li>
+</ol>
+</div>
+</div>
+<div class="section">
+<h1 class="md-h1">Лабораторная работа: простой чат на FastAPI + HTMX ws extension</h1>
+<p><strong>Часть 1:</strong> разделы <strong>1–2</strong> (вариант 0 и деплой). <strong>Часть 2:</strong> разделы <strong>3–6</strong> и <strong>8</strong> (PostgreSQL, RabbitMQ, шаблоны, проверки, тесты, CI). Подразделы <strong><code class="k">3.1</code></strong>, <strong><code class="k">5.2</code></strong> и т.п. относятся к родительскому разделу.</p>
+<h2 id="part1">Часть 1: Простой чат на сокетах</h2>
+<p>Этот вариант используется как быстрый старт:</p>
+<ul class="list-plain">
+<li>только <code class="k">FastAPI + HTMX ws extension</code>;</li>
+<li>без <code class="k">RabbitMQ</code>;</li>
+<li>без <code class="k">PostgreSQL</code>;</li>
+<li>сообщения хранятся в памяти процесса (<code class="k">in-memory</code>).</li>
+</ul>
+<h3>Цель варианта 0</h3>
+<p>Понять базовый realtime-поток:</p>
+<ol class="pad">
+<li>браузер подключается к <code class="k">/ws/{room_id}</code>;</li>
+<li>форма отправляется через <code class="k">ws-send</code>;</li>
+<li>сервер принимает сообщение и рассылает его в комнату;</li>
+<li>сообщение появляется во всех открытых вкладках комнаты.</li>
+</ol>
+<h3>Ограничения варианта 0</h3>
+<ul class="list-plain">
+<li>после перезапуска сервера история исчезает;</li>
+<li>нет гарантированной доставки;</li>
+<li>нет масштабирования между несколькими инстансами.</li>
+</ul>
+<h3>Упрощенная структура (вариант 0)</h3>
+</div>
+<div class="code-block"><code class="language-plaintext">socket-mq/
+  app/
+    main.py
+    ws.py
+    templates/
+      base.html
+      room.html
+    static/
+      styles.css
+  requirements.txt
+  Dockerfile
+  docker-compose.yml</code></div>
+<div class="section">
+<h2 id="s1">1. Подготовка окружения</h2>
+<h3>1.1 <code class="k">.env.example</code></h3>
+</div>
+<div class="code-block"><code class="language-ini">APP_HOST=0.0.0.0
+APP_PORT=8000</code></div>
+<div class="section">
+<p><code class="k">APP_PORT</code> совпадает с портом, на котором <strong>внутри контейнера</strong> запускается Uvicorn; снаружи в <code class="k">docker-compose.yml</code> проброс <code class="k">8100:8000</code> даёт доступ с хоста по <code class="k">http://localhost:8100</code>.</p>
+<h3>1.2 <code class="k">requirements.txt</code></h3>
+</div>
+<div class="code-block"><code class="language-plaintext">fastapi
+uvicorn[standard]
+jinja2</code></div>
+<div class="section">
+<h3>1.3 <code class="k">Dockerfile</code></h3>
+</div>
+<div class="code-block"><code class="language-dockerfile">FROM python:3.13-slim
+
+WORKDIR /code
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .</code></div>
+<div class="section">
+<h3>1.4 <code class="k">docker-compose.yml</code></h3>
+</div>
+<div class="code-block"><code class="language-yaml">services:
+  web:
+    build: .
+    container_name: socket_mq_web_v0
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
+    volumes:
+      - ./:/code
+    ports:
+      - &quot;8100:8000&quot;</code></div>
+<div class="section">
+<h3>1.5 Подготовьте структуру папок</h3>
+<p>Перед созданием файлов создайте каталоги проекта.</p>
+<p>Linux/macOS:</p>
+</div>
+<div class="code-block"><code class="language-bash">mkdir -p app/templates app/static</code></div>
+<div class="section">
+<p>Windows PowerShell:</p>
+</div>
+<div class="code-block"><code class="language-powershell">mkdir app, app\templates, app\static</code></div>
+<div class="section">
+<h3>1.6 Пошагово: создаем файлы простого чата (текущий рабочий вариант)</h3>
+<p><strong>Правило:</strong> после <strong>каждого</strong> шага ниже выполняйте для него блок <strong>«Проверка после шага»</strong> (запуск контейнера и/или <code class="k">curl</code>/браузер). Не переходите к следующему шагу, пока проверка не подтверждает ожидаемое поведение или пока описано иное (например, на шаге 1 полного запуска ещё нет).</p>
+<h4>Шаг 1. Создайте <code class="k">app/ws.py</code> (менеджер WS комнат)</h4>
+</div>
+<div class="code-block"><code class="language-python">from collections import defaultdict
+from fastapi import WebSocket
+
+
+class WSManager:
+    def __init__(self) -&gt; None:
+        # room_id -&gt; набор активных WebSocket-подключений.
+        self.rooms: dict[str, set[WebSocket]] = defaultdict(set)
+
+    async def connect(self, room_id: str, ws: WebSocket) -&gt; None:
+        # При подключении клиент должен быть принят и добавлен в комнату.
+        await ws.accept()
+        self.rooms[room_id].add(ws)
+
+    def disconnect(self, room_id: str, ws: WebSocket) -&gt; None:
+        # Удаляем клиента и чистим пустую комнату.
+        if room_id in self.rooms and ws in self.rooms[room_id]:
+            self.rooms[room_id].remove(ws)
+            if not self.rooms[room_id]:
+                del self.rooms[room_id]
+
+    async def broadcast(self, room_id: str, html_fragment: str) -&gt; None:
+        # Рассылка HTML-фрагмента всем участникам комнаты.
+        dead: list[WebSocket] = []
+        for ws in self.rooms.get(room_id, set()):
+            try:
+                await ws.send_text(html_fragment)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(room_id, ws)
+
+
+manager = WSManager()</code></div>
+<div class="section">
+<p><strong>Проверка после шага 1.</strong> Само по себе приложение ещё не собирается: нет <code class="k">main.py</code> и точки входа Uvicorn. Ошибок в файле быть не должно; переходите к шагу 2.</p>
+<h4>Шаг 2. Создайте <code class="k">app/main.py</code> (HTTP + WS + in-memory история)</h4>
+</div>
+<div class="code-block"><code class="language-python">import json
+from html import escape
+from datetime import datetime
+from typing import TypedDict
+
+from fastapi import FastAPI, Request, WebSocket
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from app.ws import manager
+
+
+class ChatMessage(TypedDict):
+    username: str
+    text: str
+    created_at: str
+
+
+app = FastAPI(title=&quot;Socket MQ Chat V0&quot;)
+app.mount(&quot;/static&quot;, StaticFiles(directory=&quot;app/static&quot;), name=&quot;static&quot;)
+templates = Jinja2Templates(directory=&quot;app/templates&quot;)
+# История в памяти процесса: после рестарта сервера очищается.
+messages_by_room: dict[str, list[ChatMessage]] = {}
+
+
+def render_message_fragment(msg: ChatMessage) -&gt; str:
+    # Формируем HTML для HTMX out-of-band вставки в блок #messages.
+    return (
+        &#x27;&lt;div id=&quot;messages&quot; hx-swap-oob=&quot;beforeend&quot;&gt;&#x27;
+        &#x27;&lt;article class=&quot;msg&quot;&gt;&#x27;
+        &quot;&lt;header&gt;&quot;
+        f&quot;&lt;strong&gt;{escape(msg[&#x27;username&#x27;])}&lt;/strong&gt;&quot;
+        f&quot;&lt;small&gt;{escape(msg[&#x27;created_at&#x27;])}&lt;/small&gt;&quot;
+        &quot;&lt;/header&gt;&quot;
+        f&quot;&lt;p&gt;{escape(msg[&#x27;text&#x27;])}&lt;/p&gt;&quot;
+        &quot;&lt;/article&gt;&quot;
+        &quot;&lt;/div&gt;&quot;
+    )
+
+
+def parse_ws_payload(raw: str) -&gt; ChatMessage | None:
+    # ws-send присылает JSON; превращаем его в валидное сообщение.
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+
+    username = str(data.get(&quot;username&quot;, &quot;&quot;)).strip()
+    text = str(data.get(&quot;text&quot;, &quot;&quot;)).strip()
+    if not username or not text:
+        return None
+
+    return {
+        &quot;username&quot;: username,
+        &quot;text&quot;: text,
+        &quot;created_at&quot;: datetime.utcnow().isoformat(),
+    }
+
+
+@app.get(&quot;/&quot;, response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name=&quot;room.html&quot;,
+        context={&quot;request&quot;: request, &quot;room_id&quot;: &quot;room-1&quot;},
+    )
+
+
+@app.get(&quot;/rooms/{room_id}&quot;, response_class=HTMLResponse)
+async def room_page(request: Request, room_id: str):
+    return templates.TemplateResponse(
+        request=request,
+        name=&quot;room.html&quot;,
+        context={&quot;request&quot;: request, &quot;room_id&quot;: room_id},
+    )
+
+
+@app.websocket(&quot;/ws/{room_id}&quot;)
+async def ws_room(ws: WebSocket, room_id: str):
+    await manager.connect(room_id, ws)
+    try:
+        # Новому клиенту сразу отправляем накопленную историю комнаты.
+        for msg in messages_by_room.get(room_id, []):
+            await ws.send_text(render_message_fragment(msg))
+
+        while True:
+            raw = await ws.receive_text()
+            msg = parse_ws_payload(raw)
+            if not msg:
+                continue
+
+            # Сохраняем сообщение в in-memory историю.
+            messages_by_room.setdefault(room_id, []).append(msg)
+            # Рассылаем сообщение всем клиентам комнаты.
+            await manager.broadcast(room_id, render_message_fragment(msg))
+    finally:
+        # Гарантированно удаляем соединение при любом завершении цикла.
+        manager.disconnect(room_id, ws)
+
+
+@app.get(&quot;/health&quot;)
+async def health():
+    return {&quot;status&quot;: &quot;ok&quot;}</code></div>
+<div class="section">
+<p><strong>Проверка после шага 2.</strong> В корне проекта (где <code class="k">docker-compose.yml</code>) скопируйте окружение и поднимите контейнер, если ещё не делали:</p>
+</div>
+<div class="code-block"><code class="language-bash">cp .env.example .env
+docker compose up -d --build
+curl -s http://localhost:8100/health</code></div>
+<div class="section">
+<p>Должно вернуться <code class="k">{&quot;status&quot;:&quot;ok&quot;}</code>. Страницы <code class="k">/</code> и <code class="k">/rooms/room-1</code> пока отдадут ошибку шаблона — файлы <code class="k">base.html</code> и <code class="k">room.html</code> появятся на шагах 3–4. Это нормально.</p>
+<h4>Шаг 3. Создайте шаблон <code class="k">app/templates/base.html</code></h4>
+</div>
+<div class="code-block"><code class="language-xml">&lt;!doctype html&gt;
+&lt;html lang=&quot;ru&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
+    &lt;title&gt;Socket MQ Chat V0&lt;/title&gt;
+    &lt;!-- Базовая библиотека HTMX --&gt;
+    &lt;script src=&quot;https://unpkg.com/htmx.org@1.9.12&quot;&gt;&lt;/script&gt;
+    &lt;!-- Расширение для WebSocket-интеграции (ws-connect / ws-send) --&gt;
+    &lt;script src=&quot;https://unpkg.com/htmx-ext-ws@2.0.2/ws.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/styles.css&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;!-- Контент каждой страницы подставляется в этот блок --&gt;
+    &lt;main class=&quot;container&quot;&gt;{% block content %}{% endblock %}&lt;/main&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></div>
+<div class="section">
+<p><strong>Проверка после шага 3.</strong> Пересоберите или перезапустите <strong>web</strong>, чтобы подхватить шаблон:</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build
+curl -s http://localhost:8100/health</code></div>
+<div class="section">
+<p><code class="k">/health</code> по-прежнему JSON. Страница комнаты заработает после шага 4 (<code class="k">room.html</code>).</p>
+<h4>Шаг 4. Создайте шаблон <code class="k">app/templates/room.html</code></h4>
+<p>Полный листинг с кнопками <strong>«Отправить 100»</strong> / <strong>«Отправить 1000»</strong> и скриптом <code class="k">sendBurst</code> — в <strong>разд. 2.11</strong>; скопируйте код оттуда в файл.</p>
+<p><strong>Проверка после шага 4.</strong></p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build</code></div>
+<div class="section">
+<p>Откройте в браузере <code class="k">http://localhost:8100/rooms/room-1</code>, отправьте тестовое сообщение. Чат должен работать по WebSocket; оформление доработаете на шаге 5 (<code class="k">styles.css</code>).</p>
+<h4>Шаг 5. Создайте <code class="k">app/static/styles.css</code></h4>
+</div>
+<div class="code-block"><code class="language-css">body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f6f8;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.messages {
+  min-height: 320px;
+  max-height: 500px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.msg {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+
+.msg header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.message-form {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px;
+  gap: 8px;
+}
+
+.burst-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}</code></div>
+<div class="section">
+<p><strong>Проверка после шага 5 (итог варианта 0).</strong></p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build</code></div>
+<div class="section">
+<ul class="list-plain">
+<li><code class="k">curl -s http://localhost:8100/health</code> → <code class="k">{&quot;status&quot;:&quot;ok&quot;}</code>;</li>
+<li><code class="k">http://localhost:8100/rooms/room-1</code> — страница со стилями, форма и кнопки нагрузки (<strong>разд. 2.11</strong>);</li>
+<li>две вкладки с той же комнатой: сообщение из одной видно в другой.</li>
+</ul>
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+<h2 id="s2">2. Быстрый деплой на VPS через git + ssh</h2>
+<p>Данные сервера:</p>
+<ul class="list-plain">
+<li>SSH: <code class="k">alekseeva@81.90.182.174</code></li>
+<li>Домен: <code class="k">alekseeva.h1n.ru</code></li>
+</ul>
+<h3>2.1 Первый вход</h3>
+</div>
+<div class="code-block"><code class="language-bash">ssh alekseeva@81.90.182.174</code></div>
+<div class="section">
+<h3>2.2 Подготовка сервера (один раз)</h3>
+</div>
+<div class="code-block"><code class="language-bash">sudo systemctl enable --now docker
+sudo usermod -aG docker $USER</code></div>
+<div class="section">
+<p>Пояснение:</p>
+<ul class="list-plain">
+<li><code class="k">sudo systemctl enable --now docker</code> - запускает Docker сейчас и включает автозапуск после перезагрузки сервера.</li>
+<li><code class="k">sudo usermod -aG docker $USER</code> - добавляет текущего пользователя в группу <code class="k">docker</code>, чтобы запускать команды без <code class="k">sudo</code>.</li>
+</ul>
+<p>После этого переподключитесь по SSH.</p>
+<h3>2.3 Клонирование проекта</h3>
+</div>
+<div class="code-block"><code class="language-bash">mkdir -p /opt/socket-mq
+cd /opt/socket-mq
+git clone &lt;URL_ВАШЕГО_РЕПОЗИТОРИЯ&gt; app
+cd app</code></div>
+<div class="section">
+<h3>2.4 Настройка <code class="k">.env</code></h3>
+<p>Создайте файл <code class="k">.env</code> рядом с <code class="k">docker-compose.yml</code>:</p>
+</div>
+<div class="code-block"><code class="language-ini">APP_HOST=0.0.0.0
+APP_PORT=8000</code></div>
+<div class="section">
+<p>Остальные переменные для варианта 0 не требуются. Проброс портов — как в <strong>разд. 1.4</strong> (<code class="k">8100:8000</code>).</p>
+<h3>2.5 Запуск приложения</h3>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build
+docker compose ps</code></div>
+<div class="section">
+<h3>2.6 Nginx конфиг для домена</h3>
+<p>Создайте файл <code class="k">/etc/nginx/sites-available/alekseeva.h1n.ru</code>:</p>
+</div>
+<div class="code-block"><code class="language-nginx">server {
+    listen 80;
+    server_name alekseeva.h1n.ru;
+
+    location / {
+        proxy_pass http://127.0.0.1:8100;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8100/ws/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection &quot;upgrade&quot;;
+        proxy_set_header Host $host;
+    }
+}</code></div>
+<div class="section">
+<p>Активируйте конфиг:</p>
+</div>
+<div class="code-block"><code class="language-bash">sudo ln -s /etc/nginx/sites-available/alekseeva.h1n.ru /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx</code></div>
+<div class="section">
+<p>Если получили предупреждение <code class="k">conflicting server name ... ignored</code>, значит у домена есть дублирующийся конфиг (частая ситуация после ручных правок/старых сайтов).</p>
+<p>Проверьте активные конфиги и оставьте только один для <code class="k">alekseeva.h1n.ru</code>:</p>
+</div>
+<div class="code-block"><code class="language-bash">ls -l /etc/nginx/sites-enabled
+sudo grep -R &quot;server_name alekseeva.h1n.ru&quot; /etc/nginx/sites-available /etc/nginx/sites-enabled
+sudo rm /etc/nginx/sites-enabled/alekseeva
+sudo nginx -t
+sudo systemctl reload nginx</code></div>
+<div class="section">
+<h3>2.7 HTTPS сертификат</h3>
+</div>
+<div class="code-block"><code class="language-bash">sudo certbot --nginx -d alekseeva.h1n.ru</code></div>
+<div class="section">
+<h3>2.8 Проверка</h3>
+<ul class="list-plain">
+<li><code class="k">http://alekseeva.h1n.ru/health</code></li>
+<li><code class="k">https://alekseeva.h1n.ru/health</code></li>
+<li>локально на сервере backend отвечает: <code class="k">curl -i http://127.0.0.1:8100/health</code></li>
+</ul>
+<h3>2.9 Обновление деплоя (каждый раз)</h3>
+</div>
+<div class="code-block"><code class="language-bash">ssh alekseeva@81.90.182.174
+cd /opt/socket-mq/app
+git pull
+docker compose up -d --build</code></div>
+<div class="section">
+<h3>2.10 Принудительное обновление (сотрет локальные правки tracked-файлов)</h3>
+<p>Сначала определите актуальную ветку на сервере:</p>
+</div>
+<div class="code-block"><code class="language-bash">git branch -r</code></div>
+<div class="section">
+<p>Затем выполните принудительное выравнивание (пример для <code class="k">origin/master</code>):</p>
+</div>
+<div class="code-block"><code class="language-bash">git fetch origin
+git reset --hard origin/master   # замени на нужную ветку
+git clean -fd</code></div>
+<div class="section">
+<h3 id="s211">2.11 Имитация нагрузки: шаблон <code class="k">room.html</code> и кнопки «100» / «1000»</h3>
+<h4>Шаг 4. Создайте <code class="k">app/templates/room.html</code></h4>
+<p>В этом файле задаются форма с <code class="k">ws-send</code>, блок <strong>«Отправить 100»</strong> / <strong>«Отправить 1000»</strong> и скрипт <strong><code class="k">sendBurst</code></strong>: для каждого номера меняется поле <code class="k">text</code>, вызывается <code class="k">form.requestSubmit()</code>, расширение WebSocket для HTMX шлёт JSON по уже открытому соединению. В <strong>части 1</strong> сообщения остаются в памяти <strong>web</strong>; в <strong>части 2</strong> — цепочка RabbitMQ → worker → PostgreSQL → рассылка по WebSocket; кнопки удобны для демонстрации очередей и задержек. Тот же шаблон для части 2 — в <strong>разд. 4.2</strong>; стили (включая <code class="k">.burst-controls</code>) — <strong>разд. 1.6 шаг 5</strong> и <strong>разд. 4.3</strong>.</p>
+</div>
+<div class="code-block"><code class="language-xml">{% extends &quot;base.html&quot; %}
+{% block content %}
+&lt;h1&gt;Комната: {{ room_id }}&lt;/h1&gt;
+
+&lt;section id=&quot;chat-root&quot; hx-ext=&quot;ws&quot; ws-connect=&quot;/ws/{{ room_id }}&quot;&gt;
+  &lt;div id=&quot;messages&quot; class=&quot;messages&quot;&gt;&lt;/div&gt;
+
+  &lt;form id=&quot;message-form&quot; class=&quot;message-form&quot; ws-send&gt;
+    &lt;input type=&quot;text&quot; name=&quot;username&quot; placeholder=&quot;Ваш ник&quot; required /&gt;
+    &lt;input type=&quot;text&quot; name=&quot;text&quot; placeholder=&quot;Сообщение&quot; required /&gt;
+    &lt;button type=&quot;submit&quot;&gt;Отправить&lt;/button&gt;
+  &lt;/form&gt;
+
+  &lt;div class=&quot;burst-controls&quot;&gt;
+    &lt;button type=&quot;button&quot; id=&quot;send-100&quot; onclick=&quot;sendBurst(100)&quot;&gt;Отправить 100&lt;/button&gt;
+    &lt;button type=&quot;button&quot; id=&quot;send-1000&quot; onclick=&quot;sendBurst(1000)&quot;&gt;Отправить 1000&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    let burstBusy = false;
+
+    function setFormDefaultsIfEmpty() {
+      const form = document.getElementById(&#x27;message-form&#x27;);
+      const usernameInput = form.querySelector(&#x27;input[name=&quot;username&quot;]&#x27;);
+      const textInput = form.querySelector(&#x27;input[name=&quot;text&quot;]&#x27;);
+
+      if (!usernameInput.value.trim()) usernameInput.value = &#x27;load-test&#x27;;
+      if (!textInput.value.trim()) textInput.value = &#x27;Нагрузочное сообщение&#x27;;
+    }
+
+    async function sendBurst(count) {
+      if (burstBusy) return;
+      burstBusy = true;
+
+      const form = document.getElementById(&#x27;message-form&#x27;);
+      const usernameInput = form.querySelector(&#x27;input[name=&quot;username&quot;]&#x27;);
+      const textInput = form.querySelector(&#x27;input[name=&quot;text&quot;]&#x27;);
+
+      setFormDefaultsIfEmpty();
+      const baseText = textInput.value.trim();
+      usernameInput.focus();
+
+      const btn100 = document.getElementById(&#x27;send-100&#x27;);
+      const btn1000 = document.getElementById(&#x27;send-1000&#x27;);
+      if (btn100) btn100.disabled = true;
+      if (btn1000) btn1000.disabled = true;
+
+      let i = 1;
+      const batchSize = 20;
+
+      while (i &lt;= count) {
+        const end = Math.min(count, i + batchSize - 1);
+        for (; i &lt;= end; i++) {
+          textInput.value = `${baseText} #${i}`;
+          form.requestSubmit();
+        }
+        await new Promise((r) =&gt; setTimeout(r, 0));
+      }
+
+      burstBusy = false;
+      if (btn100) btn100.disabled = false;
+      if (btn1000) btn1000.disabled = false;
+    }
+  &lt;/script&gt;
+&lt;/section&gt;
+{% endblock %}</code></div>
+<div class="section">
+<p><strong>Сценарий проверки нагрузки:</strong></p>
+<ol class="pad">
+<li>Открыть одну или несколько вкладок с комнатой <code class="k">room-1</code>:</li>
+</ol>
+<ul class="list-plain">
+<li>локально: <code class="k">http://localhost:8100/rooms/room-1</code>;</li>
+<li>на VPS: <code class="k">http://alekseeva.h1n.ru/rooms/room-1</code>.</li>
+</ul>
+<ol class="pad">
+<li>Ввести ник (если не введён, код подставит <code class="k">load-test</code> автоматически).</li>
+<li>Нажать «Отправить 100» или «Отправить 1000» и наблюдать:</li>
+</ol>
+<ul class="list-plain">
+<li>как быстро появляются сообщения;</li>
+<li>как ведёт себя браузер и сервер при серии из сотен сообщений;</li>
+<li>как это отличается при одном экземпляре сервера и при нескольких экземплярах (в варианте с брокером сообщений и базой данных, часть 2).</li>
+</ul>
+<h2 id="part2">Часть 2: Чат с базой данных и брокером сообщений</h2>
+<p>Клиент как в части 1 (<strong>HTMX</strong>, <code class="k">ws-send</code>, WebSocket). Отличие — на сервере: <strong>web</strong> не пишет в БД напрямую и не шлёт HTML сразу всем; сообщение идёт через <strong>RabbitMQ</strong> → <strong>worker</strong> (запись в <strong>PostgreSQL</strong>) → снова RabbitMQ → фоновая задача <strong>web</strong> <code class="k">consume_persisted_events</code> и <strong>broadcast</strong> в комнату.</p>
+<p><strong>По шагам:</strong> (1) JSON с формы попадает в <strong>web</strong>, публикация в RabbitMQ с ключом <code class="k">chat.message.created</code>. (2) <strong>worker</strong> читает очередь, вставляет строку в <code class="k">messages</code>, публикует <code class="k">chat.message.persisted</code>. (3) <strong>web</strong> в <code class="k">consume_persisted_events</code> забирает «persisted», собирает HTML и вызывает <code class="k">manager.broadcast</code>.</p>
+<p>Ниже — листинги для варианта с <code class="k">app/</code>, <code class="k">worker.py</code> в корне, шаблонами и стилями; можно развивать проект из части 1 или собрать каталог заново. Нужны <code class="k">docker-compose.yml</code> (сервисы <code class="k">web</code>, <code class="k">worker</code>, <code class="k">postgres</code>, <code class="k">rabbitmq</code>) и <code class="k">.env</code> по <strong>разд. 3.0</strong>.</p>
+<h2 id="s3">3. Backend (приложение и фоновые процессы)</h2>
+<p>Файлы <strong>разд. 3.1–разд. 3.5</strong> вводите по порядку; <strong>промежуточный запуск</strong> всего стека после одного только <code class="k">db.py</code> или только <code class="k">mq.py</code> не требуется — приложение и worker должны быть описаны целиком. После того как добавлены <strong>разд. 3</strong>, <strong>разд. 4</strong>, актуальный <code class="k">docker-compose.yml</code> и <code class="k">.env</code> (часть 2), переходите к <strong>разд. 5</strong> и проверяйте запуск <strong>по каждому подпункту 5.1, 5.2, …</strong> с тестовым обращением к приложению.</p>
+<h3>3.0 Файл переменных окружения <code class="k">.env</code> (образец для копирования в свой <code class="k">.env</code>)</h3>
+</div>
+<div class="code-block"><code class="language-ini">APP_HOST=0.0.0.0
+APP_PORT=8000
+
+DATABASE_URL=postgresql+asyncpg://chat:chat@postgres:5432/chat
+RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+
+MQ_EXCHANGE=chat.events
+MQ_QUEUE_INCOMING=chat.messages.incoming
+MQ_QUEUE_PERSISTED=chat.messages.persisted
+MQ_ROUTING_KEY_CREATED=chat.message.created
+MQ_ROUTING_KEY_PERSISTED=chat.message.persisted</code></div>
+<div class="section">
+<p>Проброс <strong>web</strong> <code class="k">8100:8000</code> — как в <strong>разд. 1.4</strong>; проверки ниже — <code class="k">http://127.0.0.1:8100</code>.</p>
+<h3>3.1 <code class="k">app/db.py</code></h3>
+</div>
+<div class="code-block"><code class="language-python">from datetime import datetime
+import os
+from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
+
+DATABASE_URL = os.getenv(&quot;DATABASE_URL&quot;, &quot;postgresql+asyncpg://chat:chat@postgres:5432/chat&quot;)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Message(Base):
+    __tablename__ = &quot;messages&quot;
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    room_id: Mapped[str] = mapped_column(String(100), index=True)
+    username: Mapped[str] = mapped_column(String(64))
+    text: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, index=True)
+
+
+engine = create_async_engine(DATABASE_URL, future=True, echo=False)
+SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+
+
+async def init_models() -&gt; None:
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)</code></div>
+<div class="section">
+<h3>3.2 <code class="k">app/ws.py</code></h3>
+</div>
+<div class="code-block"><code class="language-python">from collections import defaultdict
+from fastapi import WebSocket
+
+
+class WSManager:
+    def __init__(self) -&gt; None:
+        self.rooms: dict[str, set[WebSocket]] = defaultdict(set)
+
+    async def connect(self, room_id: str, ws: WebSocket) -&gt; None:
+        await ws.accept()
+        self.rooms[room_id].add(ws)
+
+    def disconnect(self, room_id: str, ws: WebSocket) -&gt; None:
+        if room_id in self.rooms and ws in self.rooms[room_id]:
+            self.rooms[room_id].remove(ws)
+            if not self.rooms[room_id]:
+                del self.rooms[room_id]
+
+    async def broadcast(self, room_id: str, payload: str) -&gt; None:
+        dead = []
+        for ws in self.rooms.get(room_id, set()):
+            try:
+                await ws.send_text(payload)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(room_id, ws)
+
+
+manager = WSManager()</code></div>
+<div class="section">
+<h3>3.3 <code class="k">app/mq.py</code></h3>
+</div>
+<div class="code-block"><code class="language-python">import json
+import os
+import asyncio
+import aio_pika
+
+
+RABBITMQ_URL = os.getenv(&quot;RABBITMQ_URL&quot;, &quot;amqp://guest:guest@rabbitmq:5672/&quot;)
+MQ_EXCHANGE = os.getenv(&quot;MQ_EXCHANGE&quot;, &quot;chat.events&quot;)
+MQ_QUEUE_INCOMING = os.getenv(&quot;MQ_QUEUE_INCOMING&quot;, &quot;chat.messages.incoming&quot;)
+MQ_QUEUE_PERSISTED = os.getenv(&quot;MQ_QUEUE_PERSISTED&quot;, &quot;chat.messages.persisted&quot;)
+MQ_ROUTING_KEY_CREATED = os.getenv(&quot;MQ_ROUTING_KEY_CREATED&quot;, &quot;chat.message.created&quot;)
+MQ_ROUTING_KEY_PERSISTED = os.getenv(&quot;MQ_ROUTING_KEY_PERSISTED&quot;, &quot;chat.message.persisted&quot;)
+
+
+class MQ:
+    def __init__(self):
+        self.connection = None
+        self.channel = None
+        self.exchange = None
+
+    async def connect(self):
+        last_error = None
+        for _ in range(20):
+            try:
+                self.connection = await aio_pika.connect_robust(RABBITMQ_URL)
+                break
+            except Exception as exc:
+                last_error = exc
+                await asyncio.sleep(1)
+        if self.connection is None:
+            raise RuntimeError(f&quot;Cannot connect to RabbitMQ: {last_error}&quot;)
+        self.channel = await self.connection.channel()
+        self.exchange = await self.channel.declare_exchange(
+            MQ_EXCHANGE, aio_pika.ExchangeType.TOPIC, durable=True
+        )
+        await self.channel.declare_queue(MQ_QUEUE_INCOMING, durable=True)
+        await self.channel.declare_queue(MQ_QUEUE_PERSISTED, durable=True)
+        q_in = await self.channel.get_queue(MQ_QUEUE_INCOMING)
+        q_out = await self.channel.get_queue(MQ_QUEUE_PERSISTED)
+        await q_in.bind(self.exchange, routing_key=MQ_ROUTING_KEY_CREATED)
+        await q_out.bind(self.exchange, routing_key=MQ_ROUTING_KEY_PERSISTED)
+
+    async def publish(self, routing_key: str, payload: dict):
+        body = json.dumps(payload).encode(&quot;utf-8&quot;)
+        msg = aio_pika.Message(body=body, delivery_mode=aio_pika.DeliveryMode.PERSISTENT)
+        await self.exchange.publish(msg, routing_key=routing_key)
+
+    async def close(self):
+        if self.connection:
+            await self.connection.close()
+
+
+mq = MQ()</code></div>
+<div class="section">
+<h3>3.4 <code class="k">app/main.py</code></h3>
+</div>
+<div class="code-block"><code class="language-python">import asyncio
+import json
+from html import escape
+from datetime import datetime
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Form, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from app.db import init_models
+from app.mq import mq, MQ_QUEUE_PERSISTED, MQ_ROUTING_KEY_CREATED
+from app.ws import manager
+
+
+templates = Jinja2Templates(directory=&quot;app/templates&quot;)
+persisted_task: asyncio.Task | None = None
+
+
+async def consume_persisted_events():
+    queue = await mq.channel.get_queue(MQ_QUEUE_PERSISTED)
+    async with queue.iterator() as iterator:
+        async for message in iterator:
+            async with message.process(requeue=True):
+                data = json.loads(message.body.decode(&quot;utf-8&quot;))
+                html_fragment = (
+                    &#x27;&lt;div id=&quot;messages&quot; hx-swap-oob=&quot;beforeend&quot;&gt;&#x27;
+                    &#x27;&lt;article class=&quot;msg&quot;&gt;&#x27;
+                    &quot;&lt;header&gt;&quot;
+                    f&quot;&lt;strong&gt;{escape(str(data[&#x27;username&#x27;]))}&lt;/strong&gt;&quot;
+                    f&quot;&lt;small&gt;{escape(str(data[&#x27;created_at&#x27;]))}&lt;/small&gt;&quot;
+                    &quot;&lt;/header&gt;&quot;
+                    f&quot;&lt;p&gt;{escape(str(data[&#x27;text&#x27;]))}&lt;/p&gt;&quot;
+                    &quot;&lt;/article&gt;&quot;
+                    &quot;&lt;/div&gt;&quot;
+                )
+                await manager.broadcast(
+                    data[&quot;room_id&quot;],
+                    html_fragment,
+                )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global persisted_task
+    await init_models()
+    await mq.connect()
+    persisted_task = asyncio.create_task(consume_persisted_events())
+    yield
+    if persisted_task:
+        persisted_task.cancel()
+    await mq.close()
+
+
+app = FastAPI(title=&quot;Socket MQ Chat&quot;, lifespan=lifespan)
+app.mount(&quot;/static&quot;, StaticFiles(directory=&quot;app/static&quot;), name=&quot;static&quot;)
+
+
+@app.get(&quot;/&quot;, response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name=&quot;room.html&quot;,
+        context={&quot;request&quot;: request, &quot;room_id&quot;: &quot;room-1&quot;},
+    )
+
+
+@app.get(&quot;/rooms/{room_id}&quot;, response_class=HTMLResponse)
+async def room_page(request: Request, room_id: str):
+    return templates.TemplateResponse(
+        request=request,
+        name=&quot;room.html&quot;,
+        context={&quot;request&quot;: request, &quot;room_id&quot;: room_id},
+    )
+
+
+@app.post(&quot;/rooms/{room_id}/messages&quot;)
+async def send_message(room_id: str, username: str = Form(...), text: str = Form(...)):
+    username = username.strip()
+    text = text.strip()
+    if not username or not text:
+        raise HTTPException(status_code=400, detail=&quot;username/text cannot be empty&quot;)
+
+    payload = {
+        &quot;room_id&quot;: room_id,
+        &quot;username&quot;: username,
+        &quot;text&quot;: text,
+        &quot;created_at&quot;: datetime.utcnow().isoformat(),
+    }
+    await mq.publish(MQ_ROUTING_KEY_CREATED, payload)
+    return {&quot;status&quot;: &quot;queued&quot;}
+
+
+@app.websocket(&quot;/ws/{room_id}&quot;)
+async def ws_room(ws: WebSocket, room_id: str):
+    await manager.connect(room_id, ws)
+    try:
+        while True:
+            raw = await ws.receive_text()
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+
+            username = str(data.get(&quot;username&quot;, &quot;&quot;)).strip()
+            text = str(data.get(&quot;text&quot;, &quot;&quot;)).strip()
+            if not username or not text:
+                continue
+
+            payload = {
+                &quot;room_id&quot;: room_id,
+                &quot;username&quot;: username,
+                &quot;text&quot;: text,
+                &quot;created_at&quot;: datetime.utcnow().isoformat(),
+            }
+            await mq.publish(MQ_ROUTING_KEY_CREATED, payload)
+    except WebSocketDisconnect:
+        manager.disconnect(room_id, ws)
+    except Exception:
+        manager.disconnect(room_id, ws)
+
+
+@app.get(&quot;/health&quot;)
+async def health():
+    return {&quot;status&quot;: &quot;ok&quot;}</code></div>
+<div class="section">
+<h3>3.5 <code class="k">worker.py</code></h3>
+</div>
+<div class="code-block"><code class="language-python">import asyncio
+import json
+from sqlalchemy import insert
+import aio_pika
+
+from app.db import Message, SessionLocal, init_models
+from app.mq import (
+    RABBITMQ_URL,
+    MQ_EXCHANGE,
+    MQ_QUEUE_INCOMING,
+    MQ_ROUTING_KEY_CREATED,
+    MQ_ROUTING_KEY_PERSISTED,
+)
+
+
+async def run_worker():
+    await init_models()
+    connection = await aio_pika.connect_robust(RABBITMQ_URL)
+    channel = await connection.channel()
+    exchange = await channel.declare_exchange(
+        MQ_EXCHANGE, aio_pika.ExchangeType.TOPIC, durable=True
+    )
+    queue = await channel.declare_queue(MQ_QUEUE_INCOMING, durable=True)
+    await queue.bind(exchange, routing_key=MQ_ROUTING_KEY_CREATED)
+
+    async with queue.iterator() as iterator:
+        async for incoming in iterator:
+            async with incoming.process(requeue=True):
+                payload = json.loads(incoming.body.decode(&quot;utf-8&quot;))
+
+                async with SessionLocal() as session:
+                    stmt = insert(Message).values(
+                        room_id=payload[&quot;room_id&quot;],
+                        username=payload[&quot;username&quot;],
+                        text=payload[&quot;text&quot;],
+                    ).returning(Message.id, Message.created_at)
+                    row = (await session.execute(stmt)).one()
+                    await session.commit()
+
+                persisted = {
+                    &quot;id&quot;: row.id,
+                    &quot;room_id&quot;: payload[&quot;room_id&quot;],
+                    &quot;username&quot;: payload[&quot;username&quot;],
+                    &quot;text&quot;: payload[&quot;text&quot;],
+                    &quot;created_at&quot;: row.created_at.isoformat(),
+                }
+                msg = aio_pika.Message(
+                    body=json.dumps(persisted).encode(&quot;utf-8&quot;),
+                    delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
+                )
+                await exchange.publish(msg, routing_key=MQ_ROUTING_KEY_PERSISTED)
+
+
+if __name__ == &quot;__main__&quot;:
+    asyncio.run(run_worker())</code></div>
+<div class="section">
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+<h2 id="s4">4. Шаблоны и стили</h2>
+<p>Те же идеи, что в части 1 (HTMX, <code class="k">ws-connect</code>, <code class="k">ws-send</code>); заголовок в <code class="k">base.html</code> — <strong>Socket MQ Chat</strong> (в варианте 0 часто <strong>V0</strong>). Кнопки нагрузки и <strong>sendBurst</strong> — см. <strong>разд. 2.11</strong>; сравнение in-memory и цепочки с брокером/БД.</p>
+<h3>4.1 <code class="k">app/templates/base.html</code></h3>
+</div>
+<div class="code-block"><code class="language-xml">&lt;!doctype html&gt;
+&lt;html lang=&quot;ru&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot; /&gt;
+    &lt;title&gt;Socket MQ Chat&lt;/title&gt;
+    &lt;script src=&quot;https://unpkg.com/htmx.org@1.9.12&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;https://unpkg.com/htmx-ext-ws@2.0.2/ws.js&quot;&gt;&lt;/script&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/styles.css&quot; /&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;main class=&quot;container&quot;&gt;{% block content %}{% endblock %}&lt;/main&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></div>
+<div class="section">
+<h3>4.2 <code class="k">app/templates/room.html</code></h3>
+<p>Тот же шаблон, что в <strong>разд. 2.11</strong> (форма <code class="k">ws-send</code>, кнопки <strong>«Отправить 100»</strong> / <strong>«Отправить 1000»</strong>, <code class="k">sendBurst</code>). Ниже — полный текст для части 2.</p>
+</div>
+<div class="code-block"><code class="language-xml">{% extends &quot;base.html&quot; %}
+{% block content %}
+&lt;h1&gt;Комната: {{ room_id }}&lt;/h1&gt;
+
+&lt;section id=&quot;chat-root&quot; hx-ext=&quot;ws&quot; ws-connect=&quot;/ws/{{ room_id }}&quot;&gt;
+  &lt;div id=&quot;messages&quot; class=&quot;messages&quot;&gt;&lt;/div&gt;
+
+  &lt;form id=&quot;message-form&quot; class=&quot;message-form&quot; ws-send&gt;
+    &lt;input type=&quot;text&quot; name=&quot;username&quot; placeholder=&quot;Ваш ник&quot; required /&gt;
+    &lt;input type=&quot;text&quot; name=&quot;text&quot; placeholder=&quot;Сообщение&quot; required /&gt;
+    &lt;button type=&quot;submit&quot;&gt;Отправить&lt;/button&gt;
+  &lt;/form&gt;
+
+  &lt;div class=&quot;burst-controls&quot;&gt;
+    &lt;button type=&quot;button&quot; id=&quot;send-100&quot; onclick=&quot;sendBurst(100)&quot;&gt;Отправить 100&lt;/button&gt;
+    &lt;button type=&quot;button&quot; id=&quot;send-1000&quot; onclick=&quot;sendBurst(1000)&quot;&gt;Отправить 1000&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;script&gt;
+    let burstBusy = false;
+
+    function setFormDefaultsIfEmpty() {
+      const form = document.getElementById(&#x27;message-form&#x27;);
+      const usernameInput = form.querySelector(&#x27;input[name=&quot;username&quot;]&#x27;);
+      const textInput = form.querySelector(&#x27;input[name=&quot;text&quot;]&#x27;);
+
+      if (!usernameInput.value.trim()) usernameInput.value = &#x27;load-test&#x27;;
+      if (!textInput.value.trim()) textInput.value = &#x27;Нагрузочное сообщение&#x27;;
+    }
+
+    async function sendBurst(count) {
+      if (burstBusy) return;
+      burstBusy = true;
+
+      const form = document.getElementById(&#x27;message-form&#x27;);
+      const usernameInput = form.querySelector(&#x27;input[name=&quot;username&quot;]&#x27;);
+      const textInput = form.querySelector(&#x27;input[name=&quot;text&quot;]&#x27;);
+
+      setFormDefaultsIfEmpty();
+      const baseText = textInput.value.trim();
+      usernameInput.focus();
+
+      const btn100 = document.getElementById(&#x27;send-100&#x27;);
+      const btn1000 = document.getElementById(&#x27;send-1000&#x27;);
+      if (btn100) btn100.disabled = true;
+      if (btn1000) btn1000.disabled = true;
+
+      let i = 1;
+      const batchSize = 20;
+
+      while (i &lt;= count) {
+        const end = Math.min(count, i + batchSize - 1);
+        for (; i &lt;= end; i++) {
+          textInput.value = `${baseText} #${i}`;
+          form.requestSubmit();
+        }
+        await new Promise((r) =&gt; setTimeout(r, 0));
+      }
+
+      burstBusy = false;
+      if (btn100) btn100.disabled = false;
+      if (btn1000) btn1000.disabled = false;
+    }
+  &lt;/script&gt;
+&lt;/section&gt;
+{% endblock %}</code></div>
+<div class="section">
+<h3>4.3 <code class="k">app/static/styles.css</code></h3>
+</div>
+<div class="code-block"><code class="language-css">body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f6f8;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.messages {
+  min-height: 320px;
+  max-height: 500px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.msg {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+
+.msg header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.message-form {
+  display: grid;
+  grid-template-columns: 160px 1fr 120px;
+  gap: 8px;
+}
+
+.burst-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}</code></div>
+<div class="section">
+<p><strong>Перед разд. 5:</strong> убедитесь, что в проекте есть все листинги <strong>разд. 3–разд. 4</strong>, <code class="k">worker.py</code>, <code class="k">docker-compose.yml</code> части 2 и <code class="k">.env</code> по <strong>разд. 3.0</strong>.</p>
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+<h2 id="s5">5. Проверка по шагам</h2>
+<p>Команды — из <strong>корня проекта</strong> (рядом <code class="k">docker-compose.yml</code> и <code class="k">.env</code>).</p>
+<p><strong>Правило:</strong> после <strong>каждого</strong> из <strong>разд. 5.1–разд. 5.5</strong> выполните указанный там <strong>запуск</strong> и <strong>проверку</strong> (браузер, <code class="k">curl</code>, логи, при необходимости БД). К следующему подпункту переходите только если результат совпадает с ожидаемым.</p>
+<h3>5.1 Инфраструктура</h3>
+<p>Команда:</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d postgres rabbitmq</code></div>
+<div class="section">
+<p>Проверка (приложение <strong>web</strong> на этом шаге ещё не запускаем):</p>
+<ul class="list-plain">
+<li><code class="k">docker compose ps</code> — контейнеры <strong>postgres</strong> и <strong>rabbitmq</strong> в состоянии <code class="k">running</code>;</li>
+<li>RabbitMQ UI открывается (порт <code class="k">15672</code> в <code class="k">docker-compose.yml</code>).</li>
+</ul>
+<p>В <code class="k">docker-compose.yml</code> для PostgreSQL задан проброс <strong><code class="k">5433:5432</code></strong>: с вашего компьютера к базе можно подключиться на <code class="k">localhost:5433</code> (логин/пароль из <code class="k">environment</code> сервиса <code class="k">postgres</code>), а приложение внутри Docker по-прежнему использует в <code class="k">DATABASE_URL</code> хост <strong><code class="k">postgres</code></strong> и порт <strong>5432</strong> внутри сети контейнеров. Так удаётся избежать конфликта, если на хосте уже занят стандартный порт <strong>5432</strong>.</p>
+<h3>5.2 Сервис web</h3>
+<p>Команда:</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build web</code></div>
+<div class="section">
+<p>Проверка (тестовый запуск приложения):</p>
+</div>
+<div class="code-block"><code class="language-bash">curl -s http://127.0.0.1:8100/health</code></div>
+<div class="section">
+<ul class="list-plain">
+<li>ответ <code class="k">{&quot;status&quot;:&quot;ok&quot;}</code>;</li>
+<li>в браузере открывается <code class="k">http://127.0.0.1:8100/rooms/room-1</code>.</li>
+</ul>
+<h3>5.3 Worker</h3>
+<p>Команда:</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose up -d --build worker</code></div>
+<div class="section">
+<p>Проверка:</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose logs worker --tail 50</code></div>
+<div class="section">
+<ul class="list-plain">
+<li>процесс worker не перезапускается в цикле;</li>
+<li>в логах нет ошибки <code class="k">relation &quot;messages&quot; does not exist</code>.</li>
+</ul>
+<h3>5.4 Realtime (две вкладки)</h3>
+<p>Проверка:</p>
+<ol class="pad">
+<li>Откройте две вкладки <code class="k">http://127.0.0.1:8100/rooms/room-1</code>.</li>
+<li>Отправьте сообщение из одной вкладки.</li>
+<li>Сообщение должно появиться в обеих вкладках.</li>
+<li>В DevTools → Network → WS должен быть запрос к <code class="k">/ws/room-1</code>.</li>
+<li>Если сообщения не появляются, проверьте:</li>
+</ol>
+<ul class="list-plain">
+<li><code class="k">docker compose logs web --tail 100</code>;</li>
+<li><code class="k">docker compose logs worker --tail 100</code>;</li>
+<li><code class="k">docker compose exec -T rabbitmq rabbitmqctl list_queues name messages consumers</code>.</li>
+</ul>
+<h3>5.5 База данных</h3>
+<p>Проверка:</p>
+<ul class="list-plain">
+<li>в таблице <code class="k">messages</code> появляются записи после отправки (через <code class="k">psql</code> или клиент к БД);</li>
+<li>история из PostgreSQL в шаблон не подгружается: в интерфейсе — только новые сообщения после сохранения worker и рассылки <code class="k">persisted</code>.</li>
+</ul>
+<h3>5.6 Деплой на VPS (часть 2 вместо варианта 0 из <strong>разд. 2</strong>)</h3>
+<p><strong>разд. 2</strong> — один контейнер <strong>web</strong> и короткий <code class="k">.env</code>. Для части 2:</p>
+<ul class="list-plain">
+<li><strong><code class="k">.env</code></strong> — полный набор по <strong>разд. 3.0</strong> (PostgreSQL, RabbitMQ, очереди, ключи маршрутизации); значения должны совпадать с <code class="k">docker-compose.yml</code> (или согласованно изменены везде).</li>
+<li><strong>Запуск:</strong> после <code class="k">git pull</code> — <code class="k">docker compose up -d --build</code> в каталоге с compose части 2; <code class="k">docker compose ps</code> — подняты <strong>web</strong>, <strong>worker</strong>, <strong>postgres</strong>, <strong>rabbitmq</strong>.</li>
+<li><strong>Nginx:</strong> как в <strong>разд. 2.6</strong>, <code class="k">proxy_pass</code> на <code class="k">127.0.0.1:8100</code> при пробросе <code class="k">8100:8000</code> менять не нужно. После правок конфига: <code class="k">sudo nginx -t</code>, <code class="k">sudo systemctl reload nginx</code>.</li>
+<li><strong>Ресурсы и порты:</strong> нагрузка выше, чем у варианта 0. Порты <strong>5433</strong>, <strong>5672</strong>, <strong>15672</strong> на хосте закрыть от интернета; для пользователей — <strong>80</strong>/<strong>443</strong>.</li>
+<li><strong>Обновления:</strong> обычно <code class="k">docker compose up -d --build</code> после <code class="k">git pull</code>; без пересборки образов — только если менялись не файлы приложения.</li>
+<li><strong>Проверка:</strong> <code class="k">/health</code> и комната по домену — как в <strong>разд. 5.2–5.4</strong>, но с вашим хостом.</li>
+</ul>
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+<h2 id="s6">6. Проверка health и тесты</h2>
+<p>Вручную:</p>
+</div>
+<div class="code-block"><code class="language-bash">curl -s http://127.0.0.1:8100/health</code></div>
+<div class="section">
+<p><strong><code class="k">pytest.ini</code></strong> в корне (нужен для импорта <code class="k">app</code> при <code class="k">pytest</code> и в CI):</p>
+</div>
+<div class="code-block"><code class="language-ini">[pytest]
+pythonpath = .
+testpaths = tests</code></div>
+<div class="section">
+<p><strong><code class="k">tests/test_health.py</code></strong> — проверка <strong><code class="k">GET /health</code></strong> через <code class="k">TestClient</code>; <strong>monkeypatch</strong> отключает реальные <code class="k">init_models</code>, <code class="k">mq.connect</code> и фоновую <code class="k">consume_persisted_events</code>, чтобы не требовать PostgreSQL/RabbitMQ (в <strong>Starlette 1.x</strong> у <code class="k">TestClient</code> нет <code class="k">lifespan=&quot;off&quot;</code>).</p>
+</div>
+<div class="code-block"><code class="language-python">import asyncio
+
+import pytest
+from fastapi.testclient import TestClient
+
+import app.main as main
+
+
+def test_health(monkeypatch: pytest.MonkeyPatch) -&gt; None:
+    async def noop() -&gt; None:
+        return None
+
+    async def fake_consume() -&gt; None:
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(main, &quot;init_models&quot;, noop)
+    monkeypatch.setattr(main.mq, &quot;connect&quot;, noop)
+    monkeypatch.setattr(main, &quot;consume_persisted_events&quot;, fake_consume)
+
+    with TestClient(main.app) as client:
+        response = client.get(&quot;/health&quot;)
+    assert response.status_code == 200
+    assert response.json() == {&quot;status&quot;: &quot;ok&quot;}</code></div>
+<div class="section">
+<p><strong><code class="k">tests/ws_check.py</code></strong> — не pytest: скрипт <code class="k">python tests/ws_check.py</code> при поднятом Compose. Два WebSocket на <code class="k">room-1</code>, затем POST на <code class="k">/rooms/room-1/messages</code>; в консоль выводятся ответы обоих сокетов (цепочка HTTP → очередь → worker → БД → очередь → WS). Пакет <strong>websockets</strong> — из <code class="k">requirements.txt</code>. В <strong>разд. 8</strong> в CI выполняется только <code class="k">pytest</code>.</p>
+</div>
+<div class="code-block"><code class="language-bash">docker compose run --rm web pytest -q</code></div>
+<div class="code-block"><code class="language-bash">python tests/ws_check.py</code></div>
+<div class="section">
+<p>(второй запуск — с хоста, когда Compose поднят и порт <strong>8100</strong> доступен.)</p>
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+<h2 id="s8">8. Этап CI (GitHub Actions)</h2>
+<p>На <strong><code class="k">push</code></strong> в <strong><code class="k">master</code></strong> — установка зависимостей и <strong><code class="k">pytest -q</code></strong> (см. <strong>разд. 6</strong>), чтобы ловить поломки до деплоя.</p>
+<p>Добавьте <code class="k">.github/workflows/ci.yml</code> (после первого push проверьте вкладку <strong>Actions</strong>).</p>
+<h3>8.1 Пример <code class="k">.github/workflows/ci.yml</code></h3>
+</div>
+<div class="code-block"><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: &quot;3.13&quot;
+      - run: pip install -r requirements.txt
+      - run: pytest -q</code></div>
+<div class="section">
+<p><code class="k">python-version</code> должен совпадать с версией в <strong>Dockerfile</strong> / локальной разработке (в проекте — <strong>3.13</strong>).</p>
+<h3>8.2 Что сдать (дополнительно к отчёту)</h3>
+<ul class="list-plain">
+<li>файл <code class="k">.github/workflows/ci.yml</code> в репозитории;</li>
+<li>скриншот успешного запуска workflow (<strong>Actions</strong> → выбранный run → зелёная галочка).</li>
+</ul>
+<h3>8.3 По желанию</h3>
+<ul class="list-plain">
+<li><code class="k">docker build</code> в job;</li>
+<li>линтер (<strong>ruff</strong> / <strong>flake8</strong>) перед <code class="k">pytest</code>;</li>
+<li>триггер <strong><code class="k">pull_request</code></strong> на <code class="k">master</code> — добавьте в <code class="k">on:</code> при необходимости.</li>
+</ul>
+<hr style="margin:24px 0;border:none;border-top:1px solid #ddd"/>
+</div>
+<div class="section" id="checklist">
+<h2>Чек-лист</h2>
+<table>
+<tr><th>Этап</th><th>Статус</th></tr>
+<tr><td>Часть 1 — вариант 0 (Docker, WS, шаблоны)</td><td><input type="checkbox" id="c-p1"></td></tr>
+<tr><td>Разд. 2 — деплой VPS, Nginx, HTTPS</td><td><input type="checkbox" id="c-s2"></td></tr>
+<tr><td>Разд. 2.11 — нагрузка 100/1000</td><td><input type="checkbox" id="c-s211"></td></tr>
+<tr><td>Часть 2 — PostgreSQL, RabbitMQ, worker</td><td><input type="checkbox" id="c-p2"></td></tr>
+<tr><td>Разд. 5 — проверки 5.1–5.6</td><td><input type="checkbox" id="c-s5"></td></tr>
+<tr><td>Разд. 6 — pytest, ws_check</td><td><input type="checkbox" id="c-s6"></td></tr>
+<tr><td>Разд. 8 — CI workflow</td><td><input type="checkbox" id="c-s8"></td></tr>
+</table>
+</div>
+<div class="section" id="repo-link-section">
+<h2>Ссылка на репозиторий</h2>
+<div class="form-group"><label for="repo-url">Ссылка на репозиторий Git с полным кодом варианта с PostgreSQL и RabbitMQ:</label><input type="text" id="repo-url" name="repo-url" placeholder="https://github.com/... или git@github.com:..."></div>
+</div>
+<div class="section" id="vyvody">
+<h2>Выводы</h2>
+<div class="form-group"><label>Что изучили:</label><textarea rows="3" id="ta0" style="width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:8px"></textarea></div>
+<div class="form-group"><label>Сложности:</label><textarea rows="3" id="ta1" style="width:100%;padding:12px;border:2px solid #e1e5e9;border-radius:8px"></textarea></div>
+</div>
+<button class="save-btn" onclick="window.print()">Сохранить в PDF</button>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.code-block code').forEach(function(el){try{hljs.highlightElement(el)}catch(e){}});
+  var KEY='laba_mq_';
+  ['student-name','group','date','repo-url'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.value=localStorage.getItem(KEY+id)||'';
+    el.addEventListener('input',function(){localStorage.setItem(KEY+id,el.value)});
+  });
+  var dateEl=document.getElementById('date');
+  if(dateEl&&!dateEl.value)dateEl.value=new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+    if(!cb.id)return;
+    if(localStorage.getItem(KEY+cb.id)==='true')cb.checked=true;
+    cb.addEventListener('change',function(){localStorage.setItem(KEY+cb.id,cb.checked)});
+  });
+  document.querySelectorAll('textarea').forEach(function(el){
+    if(!el.id)return;
+    el.value=localStorage.getItem(KEY+el.id)||'';
+    el.addEventListener('input',function(){localStorage.setItem(KEY+el.id,el.value)});
+  });
+});
+</script>
+</body>
+</html>
