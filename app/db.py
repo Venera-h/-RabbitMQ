@@ -1,6 +1,6 @@
 from datetime import datetime
 import os
-from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
@@ -48,8 +48,6 @@ class ReadCursor(Base):
     last_read_message_id: Mapped[int] = mapped_column(Integer)  # «дочитал до» этого id сообщения
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
-
 engine = create_async_engine(DATABASE_URL, future=True, echo=False)
 SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 

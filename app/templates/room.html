@@ -61,6 +61,89 @@
       if (btn100) btn100.disabled = false;
       if (btn1000) btn1000.disabled = false;
     }
+     // Доступные эмодзи (список можно сузить или вынести в шаблон).
+    const EMOJIS = ['👍', '❤️', '😂', '😮', '😢'];
+
+    function getUsername() {
+      return document.querySelector('input[name="username"]')?.value.trim() || '';
+    }
+
+    async function toggleReaction(roomId, messageId, emoji) {
+      const username = getUsername();
+      if (!username) { alert('Введите ник, чтобы поставить реакцию'); return; }
+
+      // Есть «активная» кнопка в блоке реакций — шлём DELETE (см. также п. 6.1).
+      const btn = document.querySelector(
+        `#reactions-${messageId} [data-emoji="${emoji}"][data-active="1"]`
+      );
+      const method = btn ? 'DELETE' : 'POST';
+      const fd = new FormData();
+      fd.append('username', username);
+      fd.append('emoji', emoji);
+      await fetch(`/rooms/${roomId}/messages/${messageId}/reactions`, { method, body: fd });
+      // Итоговый UI придёт по WebSocket из consume_reaction_events (oob innerHTML).
+    }
+
+    let _readTimer = null;
+    // Запоминаем последний «увиденный» id статьи, чтобы не дергать /read на каждый мелкий патч DOM.
+    let _lastSeenMsgId = 0;
+
+    function scheduleReadReceipt() {
+      clearTimeout(_readTimer);
+      _readTimer = setTimeout(doSendReadReceipt, 800);  // debounce
+    }
+
+    function doSendReadReceipt() {
+      const username = getUsername();
+      if (!username) return;
+
+      const msgs = document.querySelectorAll('article.msg[id^="msg-"]');
+      if (!msgs.length) return;
+      const lastId = parseInt([...msgs].at(-1).id.replace('msg-', ''), 10);
+      if (!lastId) return;
+
+      const fd = new FormData();
+      fd.append('username', username);
+      fd.append('message_id', lastId);
+      fetch('/rooms/{{ room_id }}/read', { method: 'POST', body: fd });
+    }
+
+    document.addEventListener('htmx:wsAfterMessage', () => {
+      // Новые message-карточки обогащаем пикером (по одному разу на article).
+      document.querySelectorAll('.msg:not([data-emoji-added])').forEach((article) => {
+        const msgId = article.id?.replace('msg-', '');
+        if (!msgId) return;
+        const roomId = '{{ room_id }}';
+        const picker = document.createElement('div');
+        picker.className = 'emoji-picker';
+        EMOJIS.forEach((e) => {
+          const btn = document.createElement('button');
+          btn.className = 'emoji-btn';
+          btn.dataset.emoji = e;
+          btn.dataset.active = '0';
+          btn.textContent = e;
+          btn.onclick = () => toggleReaction(roomId, msgId, e);
+          picker.appendChild(btn);
+        });
+        const reactDiv = article.querySelector(`#reactions-${msgId}`);
+        if (reactDiv) article.insertBefore(picker, reactDiv);
+        article.dataset.emojiAdded = '1';
+      });
+
+      const list = document.querySelectorAll('article.msg[id^="msg-"]');
+      if (!list.length) return;
+      const maxId = Math.max(
+        ...[...list].map((el) => parseInt(el.id.replace('msg-', ''), 10) || 0),
+      );
+      if (maxId > _lastSeenMsgId) {
+        _lastSeenMsgId = maxId;
+        scheduleReadReceipt();
+      }
+    });
+
+    document.querySelector('input[name="username"]').addEventListener('input', () => {
+      scheduleReadReceipt();
+    });
   </script>
 </section>
 {% endblock %}

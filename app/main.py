@@ -1,5 +1,5 @@
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import insert as pg_inser
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 import asyncio
 import json
 from html import escape
@@ -10,11 +10,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from app.db import Message, ReadCursor, SessionLocal, init_models
-
-from app.db import init_models
-from app.mq import mq, MQ_QUEUE_PERSISTED, MQ_ROUTING_KEY_CREATED
-from app.ws import manager
-
 from app.mq import (
     mq,
     MQ_QUEUE_PERSISTED,
@@ -22,6 +17,7 @@ from app.mq import (
     MQ_ROUTING_KEY_CREATED,
     MQ_ROUTING_KEY_REACTION_CREATED,
 )
+from app.ws import manager
 
 templates = Jinja2Templates(directory="app/templates")
 _bg_tasks: list[asyncio.Task] = []

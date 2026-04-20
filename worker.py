@@ -19,8 +19,11 @@ async def consume(queue_name, routing_key, handler, channel, exchange) -> None:
     await queue.bind(exchange, routing_key=routing_key)
     async with queue.iterator() as iterator:
         async for incoming in iterator:
-            async with incoming.process(requeue=True):
-                await handler(incoming, exchange)
+            async with incoming.process(requeue=False):
+                try:
+                    await handler(incoming, exchange)
+                except Exception as exc:
+                    print(f"[worker] error in {queue_name}: {exc}")
 
 
 async def run_worker() -> None:
